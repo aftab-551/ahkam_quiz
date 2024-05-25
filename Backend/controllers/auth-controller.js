@@ -1,4 +1,5 @@
-const Quiz = require('../models/quiz')
+const Quiz = require('../models/quiz');
+
 
 //get questions logic//
 const allQuiz = async(req,res)=>{
@@ -58,6 +59,7 @@ const deleteQuiz = async(req,res)=>{
         res.status(500).json({msg:e})
     }
 }
+
 
 
 module.exports = {allQuiz,quiz,updateQuiz,deleteQuiz}

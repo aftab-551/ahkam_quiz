@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState,useCallback } from 'react'
 import {
   CButton,
   CCol,
@@ -9,126 +9,122 @@ import {
   CFormTextarea,
   CFormInput,
   CFormSelect,
-} from '@coreui/react'
+} from '@coreui/react';
+import questions from '../../hooks/questions';
 import { useLocation,useNavigate } from 'react-router-dom'
+import Credentials from '../../hooks/credentails';
 
 export default function EditQustions() {
-
-  const [question,setQuestion] = useState()
-  const [option1,setOption1] = useState()
-  const [option2,setOption2] = useState()
-  const [option3,setOption3] = useState()
-  const [option4,setOption4] = useState()
-  const [correct,setCorrect] = useState()
-  const [category, setCategory] = useState()
-  const [scholar, setScholar] = useState()
-
-  const navigate = useNavigate()
+  
+  const {editQuestion, deleteQuestion} = questions();
+  const navigate = useNavigate();
   const {state} = useLocation()
   const quiz = state.item
+  const pid = quiz._id;
+  const {allCategory,allScholar} = Credentials();
 
-  console.log(quiz)
+  const allCategories = allCategory.filter((category) => category.category !== quiz.category);
+  const allScholars = allScholar.filter((scholar)=> scholar.scholar !== quiz.scholar);
 
-  
-  const handleSubmit = async(e)=>{
-    e.preventDefault()
+  const handleEditQuestion = useCallback(async (e) => {
+    e.preventDefault();
+    const data = new FormData(e.target);
+    const question = data.get('question');
+    const option1 = data.get('option1');
+    const option2 = data.get('option2');
+    const option3 = data.get('option3');
+    const option4 = data.get('option4');
+    const category = data.get('category');
+    const scholar = data.get('scholar');
+    const correct = data.get('correct');
+
+    // Call the editQuestion function with the collected data and pid
+    const response = await editQuestion({
+      question,
+      option1,
+      option2,
+      option3,
+      option4,
+      category,
+      scholar,
+      correct,
+      pid,
+    });
+
+    const res = response.json();
+    // Handle the response
+    if (res.error) {
+      console.log('Error occurred while editing question');
       
-    try{
-        const res = await fetch(`http://localhost:5000/api/questions`,{
-        method:"PUT",
-        headers:{
-          'Content-Type': 'application/json'
-        },
-        body:JSON.stringify({
-          question,
-          option1,
-          option2,
-          option3,
-          option4,
-          category,
-          scholar,
-          correct,
-          pid:quiz._id
-        })
-      })
-      const res2 = await res.json()
-
-      if(res2.error){
-        console.log("something went wrong")
-      }else{
-        console.log("Question Updated")
-      }
-
-    }catch(e){
-      console.log(e)
+    } else {
+      navigate('/questions/all-questions');
+      console.log('Successfully edited question');
     }
+  }, [editQuestion, pid]);
 
-  }
-
-  //delete function..///
-  //delete Function
-  const deleteAdmin = async() =>{
-    // console.log(id)
-    const res = await fetch(`http://localhost:5000/api/questions`,{
-        method:"DELETE",
-        headers:{
-            'Content-Type':'application/json'
-        },
-        body:JSON.stringify({pid:quiz._id})
-    })
-    const res2 = await res.json()
-    navigate('/questions/all-questions')
-}
+  const handleDeleteQuestion = useCallback(async()=>{
+    console.log(pid);
+    
+    const response = await deleteQuestion(pid);
+    if(response.ok){
+      navigate('/questions/all-questions');
+      console.log('successfully deleted question');
+    }
+    else{
+      console.log('error occured while deleting question');
+    }
+  },[deleteQuestion,pid])
 
   return (
-    <CForm className="row g-3 needs-validation" onSubmit={(e)=>handleSubmit(e)}>
+    <CForm className="row g-3 needs-validation" onSubmit={handleEditQuestion}>
       <div className="mb-3">
         <CFormLabel htmlFor="QuestionField">Write Question</CFormLabel>
-        <CFormTextarea defaultValue={quiz.question} id="QuestionField" rows={3} required onChange={(e)=>{setQuestion(e.target.value)}}></CFormTextarea>
+        <CFormTextarea name='question'  defaultValue={quiz.question} id="QuestionField" rows={3} required ></CFormTextarea>
         {/* <CFormFeedback required>Please write Question</CFormFeedback> */}
       </div>
       
       <CCol md={4}>
         <CFormLabel htmlFor='option1'> First Option </CFormLabel>
-        <CFormInput defaultValue={quiz.option1} id="option1" required onChange={(e)=>{setOption1(e.target.value)}}/>
+        <CFormInput defaultValue={quiz.option1} id="option1" name='option1' required />
         {/* <CFormFeedback required>Please write Option</CFormFeedback> */}
       </CCol>
       <CCol md={4}>
         <CFormLabel htmlFor='option2'> Second Option </CFormLabel>
-        <CFormInput defaultValue={quiz.option2} id="option2" required onChange={(e)=>{setOption2(e.target.value)}}/>
+        <CFormInput defaultValue={quiz.option2} id="option2"  name='option2' required />
         {/* <CFormFeedback required>Please write Option</CFormFeedback> */}
       </CCol>
       <CCol md={4}>
         <CFormLabel htmlFor='option3'> Third Option </CFormLabel>
-        <CFormInput defaultValue={quiz.option3} id="option3" required onChange={(e)=>{setOption3(e.target.value)}}/>
+        <CFormInput defaultValue={quiz.option3} id="option3" name='option3' required />
         {/* <CFormFeedback required>Please write Option</CFormFeedback> */}
       </CCol>
       <CCol md={4}>
         <CFormLabel htmlFor='option4'> Fourth Option </CFormLabel>
-        <CFormInput defaultValue={quiz.option4} id="option4" required onChange={(e)=>{setOption4(e.target.value)}}/>
+        <CFormInput defaultValue={quiz.option4} id="option4" name='option4' required />
         {/* <CFormFeedback required>Please write Option</CFormFeedback> */}
       </CCol>
       <CCol md={4}>
-        <CFormSelect defaultValue={quiz.category} id="category" label="Categories" required onChange={(e)=>{setCategory(e.target.value)}}>
-          <option>Choose Category</option>
-          <option>Namaz</option>
-          <option>Hajj</option>
-          <option>Zakat</option>
-        </CFormSelect>
-        <CFormFeedback invalid>Please select Category</CFormFeedback>
-      </CCol>
-      <CCol md={4}>
-        <CFormSelect defaultValue={quiz.scholar} id="scholar" label="Scholars" required onChange={(e)=>{setScholar(e.target.value)}}>
-          <option >Choose Scholar</option>
+        <CFormSelect defaultValue={quiz.category} id="category" name='category' label="Categories" required >
+          <option>{quiz.category}</option>
           <option>All</option>
-          <option>Ali al-Husayni al-Sistani</option>
-          <option>Sayyid Ahmad Khatami</option>
-          <option>Hossein Noori-Hamedani</option>
+          {allCategories.map((category)=>(
+              <option>{category.category}</option>
+          ))}
         </CFormSelect>
         <CFormFeedback invalid>Please select Category</CFormFeedback>
       </CCol>
       <CCol md={4}>
-        <CFormSelect defaultValue={quiz.correct} id="category" label="Correct Answer" required onChange={(e)=>{setCorrect(e.target.value)}}>
+        <CFormSelect defaultValue={quiz.scholar} id="scholar" name='scholar' label="Scholars" required >
+          <option >{quiz.scholar}</option>
+          <option>All</option>
+          {allScholars.map((scholar)=>(
+              <option >{scholar.scholar}</option>
+          ))}
+        </CFormSelect>
+        <CFormFeedback invalid>Please select Category</CFormFeedback>
+      </CCol>
+      <CCol md={4}>
+        <CFormSelect defaultValue={quiz.correct} id="correct" name='correct' label="Correct Answer" required >
           <option>Choose Correct Option</option>
           <option>Option1</option>
           <option>Option2</option>
@@ -139,7 +135,7 @@ export default function EditQustions() {
       </CCol>
       <CCol xs={12} style={{display:"flex",gap:"20px"}} >
         <CButton color="primary" type="submit">Update Question</CButton>
-        <CButton color="danger" variant="outline" onClick={()=>{deleteAdmin()}}>Delete Question</CButton>
+        <CButton color="danger" variant="outline" onClick={handleDeleteQuestion}>Delete Question</CButton>
       </CCol>
     </CForm>
   )

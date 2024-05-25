@@ -1,33 +1,33 @@
-const express = require("express");
-require("dotenv").config()
-const router = require('./router/auth-router')
-const connectDB = require('./helpers/db')
-const cors = require('cors')
+const http = require('http');
+const mongoose = require('mongoose')
+const app = require('./app');
 
-const app = express();
+const port = process.env.port || 8000 ;
 
+const MONGO_URI = 'mongodb+srv://ahkam-user:9e1iNxvZJpIESEo8@cluster0.peugx4w.mongodb.net/ahkam?retryWrites=true&w=majority&appName=Cluster0';
 
-//handling cors //
-const corsOptions = {
-    origin:"http://localhost:3000",
-    methods: "GET, POST, PUT, DELETE, PATCH, HEAD",
-    credentials:true
+const server = http.createServer(app);
+
+mongoose.connection.once('open',()=>{
+    console.log('MongoDb Connection Ready!');
+});
+
+mongoose.connection.on('error',(err)=>{
+    console.error('MongoDB connection error:', err);
+});
+
+async function startServer() {
+    try {
+        await mongoose.connect(MONGO_URI);
+
+        server.listen(port, () => {
+            console.log(`Listening on port ${port}`);
+        });
+    } catch (err) {
+        console.error('Failed to connect to MongoDB:', err);
+    }
 };
 
-app.use(cors(corsOptions))
+startServer();
 
-//for req.body undefined error//
-app.use(express.json())
 
-app.use('/api', router);
-
-// app.get('/',(req,res)=>{
-//     res.status(200).send("GOOOD SErver")
-// })
-
-connectDB().then(()=>{
-    app.listen(5000,()=>{
-        console.log("Server Started")
-    })
-
-})

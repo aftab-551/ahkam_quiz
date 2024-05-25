@@ -9,103 +9,64 @@ import {
   CFormTextarea,
   CFormInput,
   CFormSelect,
-} from '@coreui/react'
+} from '@coreui/react';
+import questions from '../../hooks/questions';
+import Credentials from '../../hooks/credentails';
 
 export default function AddQuestions() {
+  const {allCategory,allScholar} = Credentials();
+  const {submitQuestion} =questions();
 
-  const [question,setQuestion] = useState()
-  const [option1,setOption1] = useState()
-  const [option2,setOption2] = useState()
-  const [option3,setOption3] = useState()
-  const [option4,setOption4] = useState()
-  const [correct,setCorrect] = useState()
-  const [category, setCategory] = useState()
-  const [scholar, setScholar] = useState()
-
-  
-  const handleSubmit = async(e)=>{
-    e.preventDefault()
-      
-    try{
-      const res = await fetch(`http://localhost:5000/api/questions`,{
-        method:"POST",
-        headers:{
-          'Content-Type': 'application/json'
-        },
-        body:JSON.stringify({
-          question,
-          option1,
-          option2,
-          option3,
-          option4,
-          category,
-          scholar,
-          correct
-        })
-      })
-      const res2 = await res.json()
-
-      if(res2.error){
-        console.log("Question Already Exist")
-      }else{
-        console.log("Question Created")
-      }
-
-    }catch(e){
-      console.log(e)
-    }
-
-  }
 
   return (
-    <CForm className="row g-3 needs-validation" onSubmit={(e)=>handleSubmit(e)}>
+    <CForm className="row g-3 needs-validation" onSubmit={submitQuestion}>
       <div className="mb-3">
         <CFormLabel htmlFor="QuestionField">Write Question</CFormLabel>
-        <CFormTextarea id="QuestionField" rows={3} required onChange={(e)=>{setQuestion(e.target.value)}}></CFormTextarea>
+        <CFormTextarea name='question' id="question" rows={3} required ></CFormTextarea>
         {/* <CFormFeedback required>Please write Question</CFormFeedback> */}
       </div>
       
       <CCol md={4}>
         <CFormLabel htmlFor='option1'> First Option </CFormLabel>
-        <CFormInput id="option1" required onChange={(e)=>{setOption1(e.target.value)}}/>
+        <CFormInput id="option1" name='option1' required />
         {/* <CFormFeedback required>Please write Option</CFormFeedback> */}
       </CCol>
       <CCol md={4}>
         <CFormLabel htmlFor='option2'> Second Option </CFormLabel>
-        <CFormInput id="option2" required onChange={(e)=>{setOption2(e.target.value)}}/>
+        <CFormInput id="option2" name='option2' required />
         {/* <CFormFeedback required>Please write Option</CFormFeedback> */}
       </CCol>
       <CCol md={4}>
         <CFormLabel htmlFor='option3'> Third Option </CFormLabel>
-        <CFormInput id="option3" required onChange={(e)=>{setOption3(e.target.value)}}/>
+        <CFormInput id="option3" name='option3' required />
         {/* <CFormFeedback required>Please write Option</CFormFeedback> */}
       </CCol>
       <CCol md={4}>
         <CFormLabel htmlFor='option4'> Fourth Option </CFormLabel>
-        <CFormInput id="option4" required onChange={(e)=>{setOption4(e.target.value)}}/>
+        <CFormInput id="option4" name='option4' required />
         {/* <CFormFeedback required>Please write Option</CFormFeedback> */}
       </CCol>
       <CCol md={4}>
-        <CFormSelect id="category" label="Categories" required onChange={(e)=>{setCategory(e.target.value)}}>
+        <CFormSelect id="category" name='category' label="Categories" required >
           <option>Choose Category</option>
-          <option>Namaz</option>
-          <option>Hajj</option>
-          <option>Zakat</option>
+          {allCategory.map((category)=>(
+            <option key={category._id} value={category._id}>{category.category}</option>
+          ))}
         </CFormSelect>
         <CFormFeedback invalid>Please select Category</CFormFeedback>
       </CCol>
       <CCol md={4}>
-        <CFormSelect id="scholar" label="Scholars" required onChange={(e)=>{setScholar(e.target.value)}}>
+        <CFormSelect id="scholar" name='scholar' label="Scholars" required >
           <option >Choose Scholar</option>
-          <option>All</option>
-          <option>Ali al-Husayni al-Sistani</option>
-          <option>Sayyid Ahmad Khatami</option>
-          <option>Hossein Noori-Hamedani</option>
+          {allScholar.map((scholar)=>(
+            <option key={scholar._id} value={scholar._id}>{scholar.scholar}</option>
+          ))}
+          
         </CFormSelect>
         <CFormFeedback invalid>Please select Category</CFormFeedback>
       </CCol>
       <CCol md={4}>
-        <CFormSelect id="category" label="Correct Answer" required onChange={(e)=>{setCorrect(e.target.value)}}>
+        <CFormSelect id='correct' name='correct' label="Correct Answer" required>
           <option>Choose Correct Option</option>
           <option>Option1</option>
           <option>Option2</option>

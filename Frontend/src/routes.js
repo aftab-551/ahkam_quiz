@@ -4,12 +4,9 @@ const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
 
-//Categories
+//Credentials
 
-const Ahkam = React.lazy(() => import('./components/Categories/Ahkam'));
-const Namaz = React.lazy(() => import('./components/Categories/Namaz'));
-const Hajj = React.lazy(() => import('./components/Categories/Hajj'));
-const Zakat = React.lazy(() => import('./components/Categories/Zakat'));
+const Credentials_details = React.lazy(() => import('./components/Credentials/credentials-detail'));
 
 //Questions
 
@@ -113,15 +110,12 @@ const routes = [
   { path: '/widgets', name: 'Widgets', element: Widgets },
 
 
-  { path: '/Categories', name: 'View categories', element: Ahkam, exact: true },
-  { path: '/Categories/Ahkam', name: 'View Ahkam', element: Ahkam},
-  { path: '/Categories/Namaz', name: 'View Namaz', element: Namaz },
-  { path: '/Categories/Zakat', name: 'View Zakat', element: Zakat },
-  { path: '/Categories/Hajj', name: 'View Hajj', element: Hajj },
+  { path: '/credentials', name: 'Credentials Details', element: Credentials_details, exact: true },
+  // { path: '/credentials/credentials-detail', name: 'Credentials Details', element: Credentials_details},
   { path: '/questions', name: 'Questions', element: AddQuestions, exact: true },
   { path: '/questions/add-questions', name: 'Add Questions', element: AddQuestions },
   { path: '/questions/all-questions', name: 'All Questions', element: AllQuestions },
-  { path: '/questions/edit-questions', name: 'All Questions', element: EditQuestions },
+  { path: '/questions/edit-questions', name: 'Edit Questions', element: EditQuestions },
   { path: '/Users', name: 'View Users', element: ViewUsers, exact : true },
 ]
 

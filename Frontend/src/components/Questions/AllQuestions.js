@@ -1,69 +1,89 @@
 import React, { useEffect, useState } from 'react'
-import EditQuestions from './EditQuestions'
+
 import {
   CCard,
   CCardBody,
-  CCardHeader,
   CCol,
   CFormSelect,
   CRow,
   CTable,
   CTableBody,
-  CTableCaption,
   CTableDataCell,
   CTableHead,
   CTableHeaderCell,
   CTableRow,
   CButton,
-  CToastClose
+  CForm
 } from '@coreui/react'
-import {useNavigate} from 'react-router-dom'
+import {useNavigate} from 'react-router-dom' ;
+import questions from '../../hooks/questions';
+import Credentials from '../../hooks/credentails';
 
 export default function AllQuestions () {
+  const {allCategory,allScholar} = Credentials();
+  const {Allquestions} = questions();
+  const navigate = useNavigate();
+  const [filteredQuestion , setFilteredQuestion] = useState(Allquestions);
 
-  const [questions,setQuestions] = useState()
-  const [category,setCategory] = useState("All")
-  // const [filterData,setFiltered] = useState()
-  const navigate = useNavigate()
+  useEffect(() => {
+    setFilteredQuestion(Allquestions); // Set initial state with all questions
+  }, [Allquestions]); // Run effect when Allquestions changes
 
-  var filterData = questions
-
-  console.log(filterData)
-
-  const getAllQuestions = async()=>{
-    const res = await fetch(`http://localhost:5000/api/questions`)
-    const data = await res.json()
-    setQuestions(data)
-    // setFiltered(data)
+  const handleEditClick = (item) => {
+    navigate('/questions/edit-questions', { state: { item } });
+  };
+  const handleSearchQuestion = (event) =>{
+    event.preventDefault();
+    const data = new FormData(event.target);
+    const selectedCategory = data.get('category');
+    const selectedScholar = data.get('scholar');
+    const filterAllQuestion = Allquestions.filter((question)=>{
+      if(selectedCategory === 'All' && selectedScholar !== 'All'){
+        return question.scholar === selectedScholar ;
+      }
+      else if(selectedScholar === 'All' && selectedCategory !== 'All'){
+        return question.category === selectedCategory ;
+      }
+      else if(selectedScholar === 'All' && selectedCategory === 'All'){
+        return true;
+      }
+      else{
+        return question.scholar === selectedScholar && question.category === selectedCategory;
+      }
+    });
+    setFilteredQuestion(filterAllQuestion);
   }
-  const dataFilter =()=>{
-    filterData = filterData?.filter((item)=>{
-      item.category === category
-    })
-  }
-
-  useEffect(()=>{
-    getAllQuestions()
-    dataFilter()
-  },[category])
 
 
   return (
     <CRow>
       <CCol xs={12}>
         <CCard className="mb-4">
-          <CCardHeader style={{display:'flex',justifyContent:'space-between'}}>
-            <strong>All Quesitons</strong>
-            <CCol md={4}>
-              <CFormSelect id="category" label="Categories" required onChange={(e)=>{setCategory(e.target.value)}}>
-                <option>All</option>
-                <option>Namaz</option>
-                <option>Hajj</option>
-                <option>Zakat</option>
-              </CFormSelect>
-              {/* <CFormFeedback invalid>Please select Category</CFormFeedback> */}
-            </CCol>
-          </CCardHeader>
+          {/* <CCardHeader style={{display:'flex',justifyContent:'space-between'}}> */}
+            <CForm className="row g-3 needs-validation" onSubmit={handleSearchQuestion}>
+              <CCol md={4}>
+                <CFormSelect id="category" name='category' label="Categories" required >
+                  <option>All</option>
+                  {allCategory.map((category)=>(
+                    <option>{category.category}</option>
+                  ))}
+                </CFormSelect>
+                {/* <CFormFeedback invalid>Please select Category</CFormFeedback> */}
+              </CCol>
+              <CCol md={4}>
+                <CFormSelect id="scholar" name='scholar' label="Scholar" required >
+                  <option>All</option>
+                  {allScholar.map((scholar)=>(
+                    <option>{scholar.scholar}</option>
+                  ))}
+                </CFormSelect>
+                {/* <CFormFeedback invalid>Please select Category</CFormFeedback> */}
+              </CCol>
+              <CCol md={4} style={{ paddingTop: '28px' }}>
+                <CButton color="primary" type="submit">Search</CButton>
+              </CCol>
+            </CForm>
+          {/* </CCardHeader> */}
           <CCardBody>
             <p className="text-body-secondary small">
               {/* All Questions Related to <code>&lt;Ahkam&gt;</code> Section are Listed here. */}
@@ -83,34 +103,21 @@ export default function AllQuestions () {
                     
                   </CTableRow>
                 </CTableHead>
-                <CTableBody>
-                  {filterData?.map(item=>{
-                    return(
-                      // {item.category === category ? "":""}
-                      <CTableRow key={item._id}>
-                        <CTableHeaderCell scope="row">*</CTableHeaderCell>
-                        <CTableDataCell>{item.question}</CTableDataCell>
-                        <CTableDataCell><CButton color='link' onClick={()=>{navigate("/questions/edit-questions",{state:{item}})}}>Edit</CButton></CTableDataCell>
-                        {/* <CTableDataCell color="link"><CToastClose/></CTableDataCell> */}
-                      </CTableRow>
-                    )
-                  })}
-                  {/* {questions?.map((item)=>{
-                    return(
-                      <CTableRow key={item._id}>
-                        <CTableHeaderCell scope="row">*</CTableHeaderCell>
-                        <CTableDataCell>{item.question}</CTableDataCell> */}
-                        {/* <CTableDataCell>Carbon Dioxide</CTableDataCell>
-                        <CTableDataCell>Oxygen </CTableDataCell>
-                        <CTableDataCell>Hydrogen</CTableDataCell>
-                        <CTableDataCell>Carbon Monoxide</CTableDataCell> */}
-                        {/* <CButton color="link">Edit</CButton> */}
-                        {/* <CTableDataCell color="link">Edit</CTableDataCell>
-                        <CTableDataCell color="link"><CToastClose/></CTableDataCell>
-                      </CTableRow>
-                    )
-                  })} */}
-                </CTableBody>
+                  <CTableBody>
+                    {filteredQuestion.map(item=>{
+                      return(
+                        // {item.category === category ? "":""}
+                        <CTableRow key={item._id}>
+                          <CTableHeaderCell scope="row">*</CTableHeaderCell>
+                          <CTableDataCell>{item.question}</CTableDataCell>
+                          <CTableDataCell><CButton color='link' onClick={() => handleEditClick(item)}>Edit</CButton></CTableDataCell>
+                          {/* <CTableDataCell color="link"><CToastClose/></CTableDataCell> */}
+                        </CTableRow>
+                      )
+                    })}
+                    
+                  </CTableBody> 
+                      
               </CTable>
             
           </CCardBody>

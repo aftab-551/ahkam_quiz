@@ -24,35 +24,13 @@ const _nav = [
   },
   {
     component: CNavTitle,
-    name: 'CATEGORIES',
+    name: 'EDIT CREDENTIALS DETAILS',
   },
   {
-    component: CNavGroup,
-    name: ' View Categories',
-    to: '/Categories',
+    component: CNavItem,
+    name: 'Credentials Details',
+    to: '/credentials',
     icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
-    items: [
-      {
-        component: CNavItem,
-        name: 'View Ahkam Questions',
-        to: '/Categories/Ahkam',
-      },
-      {
-        component: CNavItem,
-        name: 'View Namaz Questions',
-        to: '/Categories/Namaz',
-      },
-      {
-        component: CNavItem,
-        name: 'View Zakat Questions',
-        to: '/Categories/Zakat',
-      },
-      {
-        component: CNavItem,
-        name: 'View Hajj Questions',
-        to: '/Categories/Hajj',
-      },
-    ],
   },
   {
     component: CNavTitle,
